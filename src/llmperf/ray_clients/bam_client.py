@@ -89,6 +89,7 @@ class BAMClient(LLMClient):
                     error_msg = response.text
                     error_response_code = response.status_code
                     response.raise_for_status()
+                print(f"response -------------- \n {response}\n")
                 for chunk in response.iter_lines(chunk_size=None):
                     chunk = chunk.strip()
 
