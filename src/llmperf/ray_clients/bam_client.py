@@ -13,7 +13,7 @@ from llmperf import common_metrics
 
 @ray.remote
 class BAMClient(LLMClient):
-    """Client for OpenAI Chat Completions API."""
+    """Client for BAM text generation API."""
 
     def llm_request(self, request_config: RequestConfig) -> Dict[str, Any]:
         prompt = request_config.prompt
@@ -25,12 +25,29 @@ class BAMClient(LLMClient):
         ]
         model = request_config.model
         body = {
-            "model": model,
+            "model_id": model,
             "messages": message,
-            "stream": True,
+            "parameters": {
+                "decoding_method": "greedy",
+                "repetition_penalty": 1.2,
+                "min_new_tokens": 1,
+                "max_new_tokens": 1024
+            },
+            "moderations": {
+                "hap": {
+                    "threshold": 0.75,
+                    "input": True,
+                    "output": True
+                },
+                "stigma": {
+                    "threshold": 0.75,
+                    "input": True,
+                    "output": True
+                }
+            }
         }
         sampling_params = request_config.sampling_params
-        body.update(sampling_params or {})
+        #body.update(sampling_params or {})
         time_to_next_token = []
         tokens_received = 0
         ttft = 0
@@ -49,16 +66,16 @@ class BAMClient(LLMClient):
         most_recent_received_token_time = time.monotonic()
         address = os.environ.get("BAM_API_BASE")
         if not address:
-            raise ValueError("the environment variable OPENAI_API_BASE must be set.")
-        key = os.environ.get("OPENAI_API_KEY")
+            raise ValueError("the environment variable BAM_API_BASE must be set.")
+        key = os.environ.get("BAM_API_KEY")
         if not key:
-            raise ValueError("the environment variable OPENAI_API_KEY must be set.")
+            raise ValueError("the environment variable BAM_API_KEY must be set.")
         headers = {"Authorization": f"Bearer {key}"}
         if not address:
             raise ValueError("No host provided.")
         if not address.endswith("/"):
             address = address + "/"
-        address += "chat/completions"
+        address += "v2/text/chat?version=2024-02-27"
         try:
             with requests.post(
                 address,
@@ -68,6 +85,7 @@ class BAMClient(LLMClient):
                 headers=headers,
             ) as response:
                 if response.status_code != 200:
+                    print(f"error response {response.status_code}")
                     error_msg = response.text
                     error_response_code = response.status_code
                     response.raise_for_status()
@@ -81,7 +99,14 @@ class BAMClient(LLMClient):
                     if chunk == b"[DONE]":
                         continue
                     tokens_received += 1
-                    data = json.loads(chunk)
+                    print(f"chunk {chunk}")
+                    data = {}
+                    try:
+                        data = json.loads(chunk)
+                    except Exception as ex:
+                        print(f"error on json load {ex}")
+
+                    print(f"data {data}")
 
                     if "error" in data:
                         error_msg = data["error"]["message"]

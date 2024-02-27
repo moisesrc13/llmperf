@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "A framework for load testing LLM APIs"
 authors = ["Avnish Narayan <avnish@anyscale.com>"]
 readme = "README.md"
-packages = [{include = "llmperf"}]
+packages = [{include = "src/llmperf"}]
 
 [tool.poetry.dependencies]
 python = ">=3.9, <3.11"
@@ -19,7 +19,8 @@ transformers = "^4.38.1"
 tqdm = "^4.66.2"
 boto3 = "^1.34.50"
 google-cloud-aiplatform = "^1.42.1"
-ibm-generative-ai =  {version = "^2.1.0", extras = ["langchain"]}
+#langchain = "^0.1.5"
+#ibm-generative-ai =  {version = "^2.1.0", extras = ["langchain"]}
 
 [tool.poetry.dev-dependencies]
 pytest = ">=6.0"
