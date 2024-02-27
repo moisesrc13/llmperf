@@ -1,23 +1,53 @@
-[build-system]
-requires = ["setuptools>=43.0.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project]
+[tool.poetry]
 name = "LLMPerf"
 version = "0.1.0"
 description = "A framework for load testing LLM APIs"
-authors = [{name="Avnish Narayan", email="avnish@anyscale.com"}]
-license = {text= "Apache-2.0"}
-requires-python = ">=3.8, <3.11"
-dependencies = ["pydantic<2.5",
-                "ray", 
-                "pytest>=6.0", 
-                "seaborn>=0.11", 
-                "awscli>=1.22", 
-                "typer>=0.4", 
-                "litellm>=0.1.738", 
-                "num2words",
-                "transformers",
-                "tqdm",
-                "boto3",
-                "google-cloud-aiplatform"]
+authors = ["Avnish Narayan <avnish@anyscale.com>"]
+readme = "README.md"
+packages = [{include = "llmperf"}]
+
+[tool.poetry.dependencies]
+python = ">=3.8, <3.11"
+pydantic = "<2.5"
+ray = "^2.9.3"
+seaborn = ">=0.11"
+awscli = ">=1.22" 
+typer = ">=0.4"
+litellm = ">=0.1.738"
+num2words = "^0.2.3 "
+transformers = "^4.38.1 "
+tqdm = "^4.66.2 "
+boto3 = "^2.49.0 "
+google-cloud-aiplatform = "^1.42.1"
+ibm-generative-ai =  {version = "^2.1.0", extras = ["langchain"]}
+
+[tool.poetry.dev-dependencies]
+pytest = ">=6.0"
+pylint = "^2.9.6"
+black = "^23.7.0"
+
+[tool.poetry.scripts]
+compile = 'scripts:compile'
+unit_test = 'scripts:unit_test'
+analyze = 'scripts:analyze'
+start_job = 'scripts:start_job'
+start_connector = 'scripts:start_connector'
+start_test_qa = 'scripts:start_test_qa'
+
+[[tool.poetry.source]]
+name = "w3_rre"
+url = "https://na.artifactory.swg-devops.com/artifactory/api/pypi/chq-dwe-w3-rre-pypi-virtual/simple"
+default = true
+
+[tool.poetry.group.dev.dependencies]
+isort = "^5.12.0"
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 100
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
