@@ -85,26 +85,26 @@ class BAMClient(LLMClient):
                 headers=headers,
             ) as response:
                 if response.status_code != 200:
-                    print(f"error response {response.status_code}")
                     error_msg = response.text
                     error_response_code = response.status_code
                     response.raise_for_status()
                 for chunk in response.iter_lines(chunk_size=None):
-                    print(f"chunk {chunk}")
+                    #print(f"chunk {chunk}")
                     chunk = chunk.strip()
                     if not chunk:
                         continue
                     data = json.loads(chunk)
                     results = data.get("results")
                     generated_text = results[0].get("generated_text")
+                    tokens_received += results[0].get("generated_token_count")
 
-                    print(f"generated_text {generated_text}")
+                    #print(f"generated_text {generated_text}")
 
                     if "error" in data:
                         error_msg = data["error"]["message"]
                         error_response_code = data["error"]["code"]
                         raise RuntimeError(data["error"]["message"])
-                        
+
                     time_to_next_token.append(
                         time.monotonic() - most_recent_received_token_time
                     )
