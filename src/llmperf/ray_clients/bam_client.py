@@ -96,7 +96,7 @@ class BAMClient(LLMClient):
                     data = json.loads(chunk)
                     results = data.get("results")
                     generated_text = results[0].get("generated_text")
-                    tokens_received += results[0].get("generated_token_count")
+                    tokens_received += int(results[0].get("generated_token_count", 0))
 
                     #print(f"generated_text {generated_text}")
 
