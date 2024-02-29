@@ -23,6 +23,7 @@ class BAMClient(LLMClient):
             {"role": "system", "content": ""},
             {"role": "user", "content": prompt},
         ]
+        print(f"prompt ============ {prompt}")
         model = request_config.model
         body = {
             "model_id": model,
@@ -95,19 +96,24 @@ class BAMClient(LLMClient):
                         continue
                     data = json.loads(chunk)
                     results = data.get("results")
-                    generated_text = results[0].get("generated_text")
+                    generated_text += results[0].get("generated_text")
                     tokens_received += int(results[0].get("generated_token_count", 0))
 
-                    #print(f"generated_text {generated_text}")
+                    print(f"generated_text {generated_text}")
 
                     if "error" in data:
                         error_msg = data["error"]["message"]
                         error_response_code = data["error"]["code"]
                         raise RuntimeError(data["error"]["message"])
 
-                    time_to_next_token.append(
-                        time.monotonic() - most_recent_received_token_time
-                    )
+                    if not ttft:
+                        ttft = time.monotonic() - start_time
+                        time_to_next_token.append(ttft)
+                    else:
+                        time_to_next_token.append(
+                            time.monotonic() - most_recent_received_token_time
+                        )
+
             total_request_time = time.monotonic() - start_time
             output_throughput = tokens_received / total_request_time
 
